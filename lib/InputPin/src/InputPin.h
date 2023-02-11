@@ -5,9 +5,14 @@
 
 class InputPin {
 private:
+    uint8_t lastSignal;
+    uint8_t signal;
     uint8_t pinNUmber;
 public:
     InputPin(uint8_t pinNumber);
-}
+
+    bool signalChanged();
+    uint8_t getSignal();
+};
 
 #endif
