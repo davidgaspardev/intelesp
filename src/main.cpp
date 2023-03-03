@@ -1,38 +1,19 @@
 #include <Arduino.h>
-#include <WiFi.h>
+#include <Wifi.h>
 #include <PubSubClient.h>
+#include <LedOnboard.h>
+#include <esp_system.h>
 
 #define WLAN_SSID ".Intelbras Coletores"
 #define WLAN_PASS "Intelbras@Coletores2018"
 
-void setupWifi() {
-  // Set credential to WiFi access point
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-
-  Serial.print("[+] Connecting on Wifi ");
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(1000);
-    Serial.print(".");
-  }
-
-  Serial.println("\n[+] Wifi connected");
-}
+LedOnboard ledOnboard;
+Wifi wifi;
 
 IPAddress server(10, 1, 15, 59);
 uint16_t port = 32354;
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
+PubSubClient client(wifi.client);
 const char* clientId = "esp32";
-const char* user = "admin";
-const char* pass = "admin";
-
-void setupMqttClient() {
-  Serial.println("[+] (MQTT) Connecting");
-
-  client.setServer(server, port);
-}
 
 void reconnectMqtt() {
   if(!client.connected()) {
@@ -48,28 +29,51 @@ void reconnectMqtt() {
   }
 }
 
+void setupMqttClient() {
+  Serial.println("[+] (MQTT) Connecting");
+
+  client.setServer(server, port);
+  reconnectMqtt();
+}
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(460800);
 
-  setupWifi();
+  pinMode(GPIO_NUM_13, INPUT_PULLDOWN);
+
+  wifi.connect(WLAN_SSID, WLAN_PASS);
   setupMqttClient();
 }
 
 unsigned int count = 0;
+uint8_t lastSignal = LOW;
+char msg[100];
 
 void loop() {
-  reconnectMqtt();
+  // Serial.print("[+] Message sent: ");
+  uint8_t signal = digitalRead(GPIO_NUM_13);
+  if (signal == HIGH && lastSignal == LOW) {
+    String mac = wifi.macAddress();
+    // Serial.println(mac.c_str());
+    sprintf(msg, "{\"pin\":13,\"mac\":\"%s\"}", mac.c_str());
+    if(!client.publish("ESP32", msg)) {
+      reconnectMqtt();
+    };
+    Serial.print("[+] Message sent: ");
+    Serial.println(msg);
+    count++;
+    lastSignal = signal;
+    return;
+  } else {
+    lastSignal = signal;
+  }
 
-  delay(1000);
+  if (signal == HIGH) {
+    ledOnboard.turnOn();
+  } else {
+    ledOnboard.turnOff();
+  }
 
-  char msg[50];
-
-  sprintf(msg, "Joven -> %d", count);
-
-  client.publish("ESP32", msg);
-  Serial.print("[+] Message sent: ");
-  Serial.println(msg);
-
-  count++;
-}  // put your main code here, to run repeatedly:
+  delay(100);
+}
