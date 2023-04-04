@@ -8,6 +8,7 @@ clang
 -I/home/intelmes/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
 -I/home/intelmes/Documents/PlatformIO/Projects/Intelesp/lib/LedOnboard/src
 -I/home/intelmes/Documents/PlatformIO/Projects/Intelesp/lib/InputPin/src
+-I/home/intelmes/Documents/PlatformIO/Projects/Intelesp/lib/Time/src
 -I/home/intelmes/Documents/PlatformIO/Projects/Intelesp/lib/MqttClient/src
 -I/home/intelmes/Documents/PlatformIO/Projects/Intelesp/lib/PulsePin
 -I/home/intelmes/Documents/PlatformIO/Projects/Intelesp/.pio/libdeps/nodemcu-32s/PubSubClient/src
