@@ -12,13 +12,13 @@ private:
     byte id[16]; // 16-bytes for client id
     PubSubClient core;
 public:
-    MqttClient();
-    MqttClient(IPAddress, uint16_t);
-    ~MqttClient();
-
+    void setup(IPAddress, uint16_t);
     bool isConnected();
+    bool connect();
     void reconnect();
     void checkConnection();
+
+    bool publish(const char* topic, const char* msg);
 };
 
 #endif
