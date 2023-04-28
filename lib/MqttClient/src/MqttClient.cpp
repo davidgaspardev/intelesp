@@ -1,12 +1,12 @@
 #include "MqttClient.h"
 
-void MqttClient::setup(IPAddress ip, uint16_t port) {
+void MqttClient::setup(IPAddress ip, uint16_t port, WiFiClient* wifiClient) {
     this->ip = ip;
     this->port = port;
     
-    WiFiClient wifiClient;
-    this->core.setClient(wifiClient);
+    this->core.setClient(*wifiClient);
     this->core.setServer(ip, port);
+    this->connect();
 }
 
 bool MqttClient::isConnected() {
@@ -14,7 +14,15 @@ bool MqttClient::isConnected() {
 }
 
 bool MqttClient::connect() {
-    return this->core.connect("test");
+    bool connectionStatus = this->core.connect("test", 0, MQTTQOS1, 0, 0);
+    
+    if(!connectionStatus) {
+        Serial.println("[-] (MqttClient) Failed to connect on the broker");
+    } else {
+        Serial.println("[+] (MqttClient) Connected on the broker");
+    }
+
+    return connectionStatus;
 }
 
 void MqttClient::reconnect() {
