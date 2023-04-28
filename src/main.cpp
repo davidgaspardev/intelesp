@@ -1,75 +1,62 @@
 #include <Arduino.h>
-#include <WiFi.h>
-#include <PubSubClient.h>
+#include <Wifi.h>
+#include <LedOnboard.h>
+#include <InputPin.h>
+#include <Time.h>
+#include <MqttClient.h>
 
 #define WLAN_SSID ".Intelbras Coletores"
 #define WLAN_PASS "Intelbras@Coletores2018"
 
-void setupWifi() {
-  // Set credential to WiFi access point
-  WiFi.begin(WLAN_SSID, WLAN_PASS);
-
-  Serial.print("[+] Connecting on Wifi ");
-
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(1000);
-    Serial.print(".");
-  }
-
-  Serial.println("\n[+] Wifi connected");
-}
-
-IPAddress server(10, 1, 15, 59);
-uint16_t port = 32354;
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
-const char* clientId = "esp32";
-const char* user = "admin";
-const char* pass = "admin";
-
-void setupMqttClient() {
-  Serial.println("[+] (MQTT) Connecting");
-
-  client.setServer(server, port);
-}
-
-void reconnectMqtt() {
-  if(!client.connected()) {
-    Serial.println("[+] (MQTT) Reconnecting");
-
-    if(client.connect(clientId, 0, MQTTQOS1, 0, 0)) {
-      Serial.println("[+] (MQTT) Reconnected");
-    } else {
-      delay(1000);
-      Serial.println("[+] (MQTT) Try to reconnect again");
-      reconnectMqtt();
-    }
-  }
-}
+LedOnboard ledOnboard;
+Wifi wifi;
+MqttClient mqttClient;
+Time timeNow;
+InputPin pin(GPIO_NUM_13);
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(460800);
 
-  setupWifi();
-  setupMqttClient();
+  // Setuping Wifi
+  wifi.connect(WLAN_SSID, WLAN_PASS);
+
+  // Setuping MQTT Client
+  IPAddress ipAddr(10, 1, 15, 59);
+  uint16_t port = 32354;
+  mqttClient.setup(ipAddr, port, &wifi.client);
+
+  // Setuping time now
+  timeNow.setup();
 }
 
-unsigned int count = 0;
-
 void loop() {
-  reconnectMqtt();
+  char msg[90]; // {"pin":13,"mac":"C8:F0:9E:51:64:F0","signal":"HIGH","date":"2023-04-28T20:12:41Z"}
 
-  delay(1000);
+  if (pin.signalChanged()) {
+    char signal[5];
+    if(pin.getSignal() == HIGH) {
+      strcpy(signal, "HIGH");
+      ledOnboard.turnOn();
+    } else {
+      strcpy(signal, "LOW");
+      ledOnboard.turnOff();
+    }
 
-  char msg[50];
+    String mac = wifi.macAddress();
+    sprintf(
+      msg,
+      "{\"pin\":13,\"mac\":\"%s\",\"signal\":\"%s\",\"date\":\"%sZ\"}",
+      mac.c_str(),
+      signal,
+      timeNow.getISOString()
+    );
 
-  sprintf(msg, "Joven -> %d", count);
+    if(!mqttClient.publish("ESP32", msg)) {
+      mqttClient.reconnect();
+    }
+    Serial.printf("[+] Message sent: %s\n", msg);
+  }
 
-  client.publish("ESP32", msg);
-  Serial.print("[+] Message sent: ");
-  Serial.println(msg);
-
-  count++;
-}  // put your main code here, to run repeatedly:
+  delay(100);
+}
