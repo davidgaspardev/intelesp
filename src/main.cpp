@@ -8,16 +8,21 @@
 #define WLAN_SSID ".Intelbras Coletores"
 #define WLAN_PASS "Intelbras@Coletores2018"
 
-#define PINS_MAX 3
+#define PINS_MAX 6
 
-LedOnboard ledOnboard;
 Wifi wifi;
-MqttClient mqttClient;
 Time timeNow;
+LedOnboard ledOnboard;
+MqttClient mqttClient;
+
+// All pins to listening signal
 InputPin pins[PINS_MAX] = {
+  InputPin(GPIO_NUM_12),
   InputPin(GPIO_NUM_13),
   InputPin(GPIO_NUM_14),
-  InputPin(GPIO_NUM_12),
+  InputPin(GPIO_NUM_15),
+  InputPin(GPIO_NUM_16),
+  InputPin(GPIO_NUM_17)
 };
 char MAC[18];
 
