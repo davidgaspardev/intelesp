@@ -24,7 +24,13 @@ InputPin pins[PINS_MAX] = {
   InputPin(GPIO_NUM_16),
   InputPin(GPIO_NUM_17)
 };
-char MAC[18];
+
+typedef struct retained_info {
+  char macAddress[18];
+  char* time;
+} retained_info_t;
+
+retained_info_t info;
 
 void setup() {
   // put your setup code here, to run once:
@@ -41,7 +47,7 @@ void setup() {
   // Setuping time now
   timeNow.setup();
 
-  strcpy(MAC, wifi.macAddress().c_str());
+  strcpy(info.macAddress, wifi.macAddress().c_str());
 }
 
 void handlePin(InputPin *pin) {
@@ -62,9 +68,9 @@ void handlePin(InputPin *pin) {
       msg,
       "{\"pin\":%d,\"mac\":\"%s\",\"signal\":\"%s\",\"date\":\"%sZ\"}",
       pin->getNumber(),
-      MAC,
+      info.macAddress,
       signal,
-      timeNow.getISOString()
+      info.time
     );
 
     if(!mqttClient.publish("ESP32", msg)) {
@@ -75,9 +81,9 @@ void handlePin(InputPin *pin) {
 }
 
 void loop() {
-  for(int i = 0; i < PINS_MAX; i++) {
-    handlePin(&pins[i]);
-  }
+  info.time = timeNow.getISOString();
 
-  delay(32);
+  for(int i = 0; i < PINS_MAX; i++) handlePin(&pins[i]);
+
+  delay(16);
 }
