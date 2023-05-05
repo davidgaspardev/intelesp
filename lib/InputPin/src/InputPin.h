@@ -13,6 +13,7 @@ public:
 
     bool signalChanged();
     uint8_t getSignal();
+    uint8_t getNumber();
 };
 
 #endif
