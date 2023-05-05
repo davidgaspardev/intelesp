@@ -8,11 +8,18 @@
 #define WLAN_SSID ".Intelbras Coletores"
 #define WLAN_PASS "Intelbras@Coletores2018"
 
+#define PINS_MAX 3
+
 LedOnboard ledOnboard;
 Wifi wifi;
 MqttClient mqttClient;
 Time timeNow;
-InputPin pin(GPIO_NUM_13);
+InputPin pins[PINS_MAX] = {
+  InputPin(GPIO_NUM_13),
+  InputPin(GPIO_NUM_14),
+  InputPin(GPIO_NUM_12),
+};
+char MAC[18];
 
 void setup() {
   // put your setup code here, to run once:
@@ -28,14 +35,16 @@ void setup() {
 
   // Setuping time now
   timeNow.setup();
+
+  strcpy(MAC, wifi.macAddress().c_str());
 }
 
-void loop() {
-  char msg[90]; // {"pin":13,"mac":"C8:F0:9E:51:64:F0","signal":"HIGH","date":"2023-04-28T20:12:41Z"}
+void handlePin(InputPin *pin) {
+    char msg[90]; // {"pin":13,"mac":"C8:F0:9E:51:64:F0","signal":"HIGH","date":"2023-04-28T20:12:41Z"}
 
-  if (pin.signalChanged()) {
+   if (pin->signalChanged()) {
     char signal[5];
-    if(pin.getSignal() == HIGH) {
+    if(pin->getSignal() == HIGH) {
       strcpy(signal, "HIGH");
       ledOnboard.turnOn();
     } else {
@@ -46,8 +55,9 @@ void loop() {
     String mac = wifi.macAddress();
     sprintf(
       msg,
-      "{\"pin\":13,\"mac\":\"%s\",\"signal\":\"%s\",\"date\":\"%sZ\"}",
-      mac.c_str(),
+      "{\"pin\":%d,\"mac\":\"%s\",\"signal\":\"%s\",\"date\":\"%sZ\"}",
+      pin->getNumber(),
+      MAC,
       signal,
       timeNow.getISOString()
     );
@@ -57,6 +67,12 @@ void loop() {
     }
     Serial.printf("[+] Message sent: %s\n", msg);
   }
+}
 
-  delay(100);
+void loop() {
+  for(int i = 0; i < PINS_MAX; i++) {
+    handlePin(&pins[i]);
+  }
+
+  delay(32);
 }
