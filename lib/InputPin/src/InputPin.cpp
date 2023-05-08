@@ -18,3 +18,7 @@ uint8_t InputPin::getSignal() {
 
     return this->signal;
 }
+
+uint8_t InputPin::getNumber() {
+    return this->pinNumber;
+}
