@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Arduino.h>
+#include <random>
 
 class MqttClient {
 private:
@@ -12,6 +13,8 @@ private:
     byte id[16]; // 16-bytes for client id
     PubSubClient core;
     WiFiClient wifiClient;
+    char clientId[6];
+    void generateClientId();
 public:
     void setup(IPAddress, uint16_t, WiFiClient*);
     bool isConnected();

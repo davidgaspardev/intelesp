@@ -14,12 +14,13 @@ bool MqttClient::isConnected() {
 }
 
 bool MqttClient::connect() {
-    bool connectionStatus = this->core.connect("test", 0, MQTTQOS1, 0, 0);
+    generateClientId();
+    bool connectionStatus = this->core.connect(this->clientId, NULL, NULL, NULL, NULL);
     
     if(!connectionStatus) {
         Serial.println("[-] (MqttClient) Failed to connect on the broker");
     } else {
-        Serial.println("[+] (MqttClient) Connected on the broker");
+        Serial.printf("[+] (MqttClient) Connected on the broker: %s\n", this->clientId);
     }
 
     return connectionStatus;
@@ -35,4 +36,12 @@ void MqttClient::reconnect() {
 
 bool MqttClient::publish(const char* topic, const char* msg) {
     return this->core.publish(topic, msg);
+}
+
+void MqttClient::generateClientId() {
+    for (int i = 0; i < 5; i++) {
+        this->clientId[i] = '0' + random(0, 10);
+    }
+
+    this->clientId[5] = '\0';
 }
