@@ -41,7 +41,7 @@ void setup() {
 
   // Setuping MQTT Client
   IPAddress ipAddr(10, 1, 15, 59);
-  uint16_t port = 32354;
+  uint16_t port = 32103;
   mqttClient.setup(ipAddr, port, &wifi.client);
 
   // Setuping time now
@@ -86,4 +86,5 @@ void loop() {
   for(int i = 0; i < PINS_MAX; i++) handlePin(&pins[i]);
 
   delay(16);
+  
 }
