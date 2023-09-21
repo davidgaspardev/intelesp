@@ -55,7 +55,7 @@ void handlePin(InputPin *pin) {
 
    if (pin->signalChanged()) {
     char signal[5];
-    if(pin->getSignal() == HIGH) {
+    if(pin->getSignal() != HIGH) {  /** need to do like that, 'cause we are using GND font */
       strcpy(signal, "HIGH");
       ledOnboard.turnOn();
     } else {

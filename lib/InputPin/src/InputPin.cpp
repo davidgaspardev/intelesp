@@ -4,7 +4,7 @@ InputPin::InputPin(uint8_t pinNumber) {
     this->pinNumber = pinNumber;
     this->lastSignal = LOW;
 
-    pinMode(pinNumber, INPUT_PULLDOWN);
+    pinMode(pinNumber, INPUT_PULLUP);
 }
 
 bool InputPin::signalChanged() {
