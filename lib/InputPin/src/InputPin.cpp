@@ -2,9 +2,9 @@
 
 InputPin::InputPin(uint8_t pinNumber) {
     this->pinNumber = pinNumber;
-    this->lastSignal = LOW;
-
     pinMode(pinNumber, INPUT_PULLUP);
+    
+    this->lastSignal = digitalRead(this->pinNumber);
 }
 
 bool InputPin::signalChanged() {

@@ -15,7 +15,7 @@ bool MqttClient::isConnected() {
 
 bool MqttClient::connect() {
     generateClientId();
-    bool connectionStatus = this->core.connect(this->clientId, NULL, NULL, NULL, NULL);
+    bool connectionStatus = this->core.connect(this->clientId);
     
     if(!connectionStatus) {
         Serial.println("[-] (MqttClient) Failed to connect on the broker");
@@ -27,10 +27,14 @@ bool MqttClient::connect() {
 }
 
 void MqttClient::reconnect() {
-    if(!this->isConnected()) {
+    int k = 0;
+    while(!this->isConnected()) {
+        Serial.println("Tentando Reconectar MQTT");
         bool isConnected = this->connect();
-
-        if (!isConnected) this->reconnect(); // Try again
+        k++;
+        if(k >= 10) {
+            ESP.restart();
+        }
     }
 }
 

@@ -8,7 +8,7 @@
 #define WLAN_SSID ".Intelbras Coletores"
 #define WLAN_PASS "Intelbras@Coletores2018"
 
-#define PINS_MAX 6
+#define PINS_MAX 5
 
 Wifi wifi;
 Time timeNow;
@@ -17,12 +17,11 @@ MqttClient mqttClient;
 
 // All pins to listening signal
 InputPin pins[PINS_MAX] = {
-  InputPin(GPIO_NUM_12),
-  InputPin(GPIO_NUM_13),
-  InputPin(GPIO_NUM_14),
-  InputPin(GPIO_NUM_15),
   InputPin(GPIO_NUM_16),
-  InputPin(GPIO_NUM_17)
+  InputPin(GPIO_NUM_17),
+  InputPin(GPIO_NUM_18),
+  InputPin(GPIO_NUM_19),
+  InputPin(GPIO_NUM_34)
 };
 
 typedef struct retained_info {
@@ -48,12 +47,15 @@ void setup() {
   timeNow.setup();
 
   strcpy(info.macAddress, wifi.macAddress().c_str());
+
+  Serial.printf("Saindo SETUP");
 }
 
 void handlePin(InputPin *pin) {
-    char msg[90]; // {"pin":13,"mac":"C8:F0:9E:51:64:F0","signal":"HIGH","date":"2023-04-28T20:12:41Z"}
+   char msg[90]; // {"pin":13,"mac":"C8:F0:9E:51:64:F0","signal":"HIGH","date":"2023-04-28T20:12:41Z"}
 
    if (pin->signalChanged()) {
+    Serial.printf("Signal Changed");
     char signal[5];
     if(pin->getSignal() != HIGH) {  /** need to do like that, 'cause we are using GND font */
       strcpy(signal, "HIGH");
@@ -73,8 +75,14 @@ void handlePin(InputPin *pin) {
       info.time
     );
 
-    if(!mqttClient.publish("ESP32", msg)) {
+    int t = 0;
+
+    while(!mqttClient.publish("ESP32", msg)) {
       mqttClient.reconnect();
+      t++;
+      if(t > 10) {
+        ESP.restart();
+      }
     }
     Serial.printf("[+] Message sent: %s\n", msg);
   }
@@ -84,6 +92,10 @@ void loop() {
   info.time = timeNow.getISOString();
 
   for(int i = 0; i < PINS_MAX; i++) handlePin(&pins[i]);
+
+  if(!mqttClient.isConnected()) {
+    mqttClient.reconnect();
+  }
 
   delay(16);
   
