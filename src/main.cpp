@@ -8,7 +8,7 @@
 #define WLAN_SSID ".Intelbras Coletores"
 #define WLAN_PASS "Intelbras@Coletores2018"
 
-#define PINS_MAX 5
+#define PINS_MAX 1
 
 Wifi wifi;
 Time timeNow;
@@ -17,11 +17,7 @@ MqttClient mqttClient;
 
 // All pins to listening signal
 InputPin pins[PINS_MAX] = {
-  InputPin(GPIO_NUM_16),
-  InputPin(GPIO_NUM_17),
-  InputPin(GPIO_NUM_18),
-  InputPin(GPIO_NUM_19),
-  InputPin(GPIO_NUM_34)
+  InputPin(GPIO_NUM_33)
 };
 
 typedef struct retained_info {
@@ -38,6 +34,9 @@ void setup() {
   // Setuping Wifi
   wifi.connect(WLAN_SSID, WLAN_PASS);
 
+  // Define broker client id as macAdress
+  strcpy(mqttClient.clientId, wifi.macAddress().c_str());
+
   // Setuping MQTT Client
   IPAddress ipAddr(10, 1, 15, 59);
   uint16_t port = 32103;
@@ -48,7 +47,7 @@ void setup() {
 
   strcpy(info.macAddress, wifi.macAddress().c_str());
 
-  Serial.printf("Saindo SETUP");
+  Serial.println("Saindo SETUP");
 }
 
 void handlePin(InputPin *pin) {
@@ -78,7 +77,7 @@ void handlePin(InputPin *pin) {
     int t = 0;
 
     while(!mqttClient.publish("ESP32", msg)) {
-      mqttClient.reconnect();
+      mqttClient.connect();
       t++;
       if(t > 10) {
         ESP.restart();
@@ -94,9 +93,15 @@ void loop() {
   for(int i = 0; i < PINS_MAX; i++) handlePin(&pins[i]);
 
   if(!mqttClient.isConnected()) {
-    mqttClient.reconnect();
+    Serial.println("\n[+] MQTT Broker Conection Losted");
+    mqttClient.connect();
   }
 
-  delay(16);
+  if(!wifi.isConnected()) {
+    Serial.println("\n[+] Wifi Conection Losted");
+    wifi.connect(WLAN_SSID, WLAN_PASS);
+  }
+
+  mqttClient.loop();
   
 }
