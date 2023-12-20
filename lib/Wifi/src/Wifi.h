@@ -13,6 +13,7 @@ public:
     WiFiClient client;
     
     void connect(const char* ssid, const char* pass);
+    bool isConnected();
     String macAddress();
 };
 
