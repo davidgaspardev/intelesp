@@ -13,15 +13,12 @@ private:
     byte id[16]; // 16-bytes for client id
     PubSubClient core;
     WiFiClient wifiClient;
-    char clientId[6];
-    void generateClientId();
 public:
+    char clientId[18];
     void setup(IPAddress, uint16_t, WiFiClient*);
     bool isConnected();
     bool connect();
-    void reconnect();
-    void checkConnection();
-
+    bool loop(); 
     bool publish(const char* topic, const char* msg);
 };
 

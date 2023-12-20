@@ -14,38 +14,33 @@ bool MqttClient::isConnected() {
 }
 
 bool MqttClient::connect() {
-    generateClientId();
     bool connectionStatus = this->core.connect(this->clientId);
-    
-    if(!connectionStatus) {
+
+    int timeout_counter = 0;
+
+    while(!connectionStatus) {
         Serial.println("[-] (MqttClient) Failed to connect on the broker");
-    } else {
-        Serial.printf("[+] (MqttClient) Connected on the broker: %s\n", this->clientId);
-    }
+        delay(1000);
+        
+        Serial.println("[-] (MqttClient) Trying to connect again");
+        connectionStatus = this->core.connect(this->clientId);
 
-    return connectionStatus;
-}
-
-void MqttClient::reconnect() {
-    int k = 0;
-    while(!this->isConnected()) {
-        Serial.println("Tentando Reconectar MQTT");
-        bool isConnected = this->connect();
-        k++;
-        if(k >= 10) {
+        timeout_counter++;
+        if(timeout_counter >= 20){
+            Serial.println("\n[-] (MqttClient) Error to connect on the Broker, RESTARTING ESP32");
             ESP.restart();
         }
-    }
+    } 
+    
+    Serial.printf("[+] (MqttClient) Connected on the broker: %s\n", this->clientId);
+
+    return connectionStatus;
 }
 
 bool MqttClient::publish(const char* topic, const char* msg) {
     return this->core.publish(topic, msg);
 }
 
-void MqttClient::generateClientId() {
-    for (int i = 0; i < 5; i++) {
-        this->clientId[i] = '0' + random(0, 10);
-    }
-
-    this->clientId[5] = '\0';
+bool MqttClient::loop() {
+    return this->core.loop();
 }
