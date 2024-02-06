@@ -4,7 +4,6 @@ Time::Time() : wifiUdp(), nptClient(wifiUdp) {}
 
 void Time::setup() {
     nptClient.begin();
-    nptClient.setTimeOffset(-10800);
 }
 
 char* Time::getISOString() {
