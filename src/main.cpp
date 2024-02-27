@@ -62,6 +62,7 @@ void handlePin(InputPin *pin) {
     } else {
       strcpy(signal, "LOW");
       ledOnboard.turnOff();
+      delay(1000);
     }
 
     String mac = wifi.macAddress();
