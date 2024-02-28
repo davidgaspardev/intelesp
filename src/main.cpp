@@ -1,8 +1,8 @@
 #include <Arduino.h>
-#include <Wifi.h>
+#include <MyWifi.h>
 #include <LedOnboard.h>
 #include <InputPin.h>
-#include <Time.h>
+#include <MyTime.h>
 #include <MqttClient.h>
 
 #define WLAN_SSID ".Intelbras Coletores"
@@ -10,8 +10,8 @@
 
 #define PINS_MAX 1
 
-Wifi wifi;
-Time timeNow;
+MyWifi wifi;
+MyTime timeNow;
 LedOnboard ledOnboard;
 MqttClient mqttClient;
 

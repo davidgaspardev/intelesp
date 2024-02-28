@@ -1,11 +1,11 @@
-#ifndef WIFI_H
-#define WIFI_H
+#ifndef _MY_WIFI_H
+#define _MY_WIFI_H
 
 #include <Arduino.h>
 #include <WiFi.h>
 // #include <String>
 
-class Wifi {
+class MyWifi {
 private:
     char ssid[50];
     char pass[50];

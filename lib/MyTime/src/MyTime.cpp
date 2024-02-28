@@ -1,13 +1,13 @@
-#include "Time.h"
+#include "MyTime.h"
 
-Time::Time() : wifiUdp(), nptClient(wifiUdp) {}
+MyTime::MyTime() : wifiUdp(), nptClient(wifiUdp) {}
 
-void Time::setup() {
+void MyTime::setup() {
     nptClient.begin();
     nptClient.setTimeOffset(-10800);
 }
 
-char* Time::getISOString() {
+char* MyTime::getISOString() {
     this->nptClient.update();
     time_t epoch_time = this->nptClient.getEpochTime();
     struct tm* tm_info = localtime(&epoch_time);

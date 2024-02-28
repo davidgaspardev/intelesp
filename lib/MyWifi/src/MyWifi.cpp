@@ -1,6 +1,6 @@
-#include "Wifi.h"
+#include "MyWifi.h"
 
-void Wifi::connect(const char* ssid, const char* pass) {
+void MyWifi::connect(const char* ssid, const char* pass) {
     strcpy(this->ssid, ssid);
     strcpy(this->pass, pass);
 
@@ -22,7 +22,7 @@ void Wifi::connect(const char* ssid, const char* pass) {
     Serial.println("\n[+] Connected on the Wifi");
 }
 
-bool Wifi::isConnected() {
+bool MyWifi::isConnected() {
     if ( WiFi.status() != WL_CONNECTED ) {
         return false;
     } else {
@@ -30,6 +30,6 @@ bool Wifi::isConnected() {
     }
 }
 
-String Wifi::macAddress() {
+String MyWifi::macAddress() {
     return WiFi.macAddress();
 }

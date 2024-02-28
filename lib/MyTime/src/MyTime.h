@@ -1,17 +1,17 @@
-#ifndef TIME_H_
-#define TIME_H_
+#ifndef MY_TIME_H_
+#define MY_TIME_H_
 
 #include <time.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 
-class Time {
+class MyTime {
 private:
     WiFiUDP wifiUdp;
     NTPClient nptClient;
     char iso8601[20];
 public:
-    Time();
+    MyTime();
     void setup();
     char* getISOString(); 
 };
